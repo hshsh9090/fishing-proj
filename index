@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Фишинг: узнай и защитись</title>
+<style>
+  :root {
+    --blue: #1a56db;
+    --dark: #111827;
+    --gray: #374151;
+    --light: #f9fafb;
+    --green: #059669;
+    --red: #dc2626;
+    --yellow: #d97706;
+    --border: #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f3f4f6; color: var(--dark); }
+
+  header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1a56db 100%);
+    color: white; padding: 20px 40px; display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 2px 12px rgba(26,86,219,.3);
+  }
+  header .logo { font-size: 2rem; }
+  header h1 { font-size: 1.5rem; font-weight: 700; }
+  header p { font-size: .9rem; opacity: .85; margin-top: 2px; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
+
+  
+  .progress-wrap { background: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .progress-label { display: flex; justify-content: space-between; font-size: .85rem; color: var(--gray); margin-bottom: 8px; }
+  .progress-bar { background: var(--border); border-radius: 99px; height: 10px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #1a56db, #06b6d4); height: 100%; border-radius: 99px; transition: width .4s ease; }
+
+  
+  .card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 6px rgba(0,0,0,.09); margin-bottom: 20px; }
+  .card h2 { font-size: 1.4rem; color: var(--blue); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .card p { line-height: 1.75; color: var(--gray); margin-bottom: 12px; }
+  .card ul, .card ol { padding-left: 20px; color: var(--gray); line-height: 1.9; }
+  .card ul li, .card ol li { margin-bottom: 6px; }
+
+  .highlight-box { background: #eff6ff; border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+  .danger-box { background: #fef2f2; border-left: 4px solid var(--red); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+  .success-box { background: #f0fdf4; border-left: 4px solid var(--green); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+
+  .tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: .78rem; font-weight: 600; padding: 3px 10px; border-radius: 99px; margin: 3px; }
+
+  
+  .nav-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
+  button { cursor: pointer; border: none; border-radius: 8px; font-size: .95rem; font-weight: 600; padding: 11px 24px; transition: all .2s; }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-primary:hover { background: #1e40af; transform: translateY(-1px); }
+  .btn-secondary { background: var(--border); color: var(--dark); }
+  .btn-secondary:hover { background: #d1d5db; }
+  .btn-success { background: var(--green); color: white; }
+  .btn-success:hover { background: #047857; }
+  .btn-disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+
+  
+  .section-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+  .section-tab { padding: 7px 16px; border-radius: 8px; font-size: .85rem; font-weight: 600; border: 2px solid var(--border); background: white; color: var(--gray); cursor: default; }
+  .section-tab.done { border-color: var(--green); color: var(--green); background: #f0fdf4; }
+  .section-tab.active { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+
+  
+  .quiz-question { font-size: 1.1rem; font-weight: 600; margin-bottom: 18px; line-height: 1.5; }
+  .quiz-counter { font-size: .85rem; color: var(--gray); margin-bottom: 8px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { padding: 13px 18px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .15s; background: white; text-align: left; font-size: .95rem; color: var(--dark); }
+  .option:hover:not(:disabled) { border-color: var(--blue); background: #eff6ff; }
+  .option.correct { border-color: var(--green); background: #f0fdf4; color: #065f46; }
+  .option.wrong { border-color: var(--red); background: #fef2f2; color: #991b1b; }
+  .option:disabled { cursor: default; }
+  .feedback { margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: .9rem; font-weight: 500; }
+  .feedback.ok { background: #f0fdf4; color: #065f46; }
+  .feedback.fail { background: #fef2f2; color: #991b1b; }
+
+  
+  .result-circle { width: 130px; height: 130px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; }
+  .result-score { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+  .result-total { font-size: 1rem; opacity: .8; }
+
+  
+  .intro-hero { text-align: center; padding: 16px 0 8px; }
+  .intro-hero .icon { font-size: 4rem; margin-bottom: 12px; }
+  .intro-hero h2 { font-size: 2rem; color: var(--dark); margin-bottom: 12px; }
+  .intro-hero p { font-size: 1.05rem; color: var(--gray); max-width: 560px; margin: 0 auto 24px; line-height: 1.7; }
+  .steps-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .step-item { background: #eff6ff; border-radius: 12px; padding: 16px 20px; width: 200px; text-align: center; }
+  .step-item .step-num { font-size: 1.6rem; font-weight: 800; color: var(--blue); }
+  .step-item .step-label { font-size: .88rem; color: var(--gray); margin-top: 4px; line-height: 1.4; }
+
+  .lock-msg { text-align: center; padding: 24px; color: var(--gray); }
+  .lock-msg .lock-icon { font-size: 3rem; margin-bottom: 12px; }
+
+  footer { text-align: center; padding: 28px; color: #9ca3af; font-size: .85rem; margin-top: 16px; }
+  footer a { color: var(--blue); text-decoration: none; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🛡️</div>
+  <div>
+    <h1>Фишинг: узнай и защитись</h1>
+    <p>Образовательный проект по информационной безопасности</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progressLabel">Начало обучения</span>
+      <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Section tabs -->
+  <div class="section-tabs" id="sectionTabs"></div>
+
+  <!-- SCREENS -->
+  <div id="screenIntro">
+    <div class="card">
+      <div class="intro-hero">
+        <div class="icon">🎣</div>
+        <h2>Добро пожаловать!</h2>
+        <p>Этот сайт поможет тебе понять, что такое фишинг, как его распознать и защитить свои данные. Пройди все разделы обучения, а затем проверь свои знания в тесте.</p>
+        <div class="steps-row">
+          <div class="step-item"><div class="step-num">1</div><div class="step-label">Изучи 4 обучающих раздела</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-label">Нажимай «Далее» в каждом</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-label">Пройди тест из 10 вопросов</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row"><button class="btn-primary" onclick="startLearning()">Начать обучение →</button></div>
+  </div>
+
+  <!-- LESSON 0: Что такое фишинг -->
+  <div id="lesson0" class="hidden">
+    <div class="card">
+      <h2>🎣 Что такое фишинг?</h2>
+      <p><strong>Фишинг</strong> (от англ. <em>phishing</em> — «рыбная ловля») — это вид интернет-мошенничества, при котором злоумышленники пытаются обманом выманить у пользователей конфиденциальные данные: логины, пароли, номера банковских карт и другую личную информацию.</p>
+      <div class="highlight-box">
+        <strong>Ключевая идея:</strong> мошенники не взламывают системы напрямую — они «ловят» самих пользователей, заставляя их добровольно отдать данные.
+      </div>
+      <p>Фишинг появился в середине 1990-х и с тех пор стал одной из главных угроз в кибербезопасности. Злоумышленники маскируются под банки, магазины, госорганы или популярные сервисы.</p>
+      <p>В основе фишинга лежит <strong>социальная инженерия</strong> — психологическое манипулирование. Мошенники давят на страх, срочность, любопытство или доверие, вынуждая жертву действовать не думая.</p>
+      <div class="danger-box">
+        Ежегодно миллионы пользователей теряют деньги и личные данные из-за фишинга. Это явление касается каждого, кто пользуется интернетом.
+      </div>
+    </div>
+    <div class="nav-row"><button class="btn-primary" onclick="nextLesson(0)">Далее →</button></div>
+  </div>
+
+  <!-- LESSON 1: Виды фишинга -->
+  <div id="lesson1" class="hidden">
+    <div class="card">
+      <h2>🕵️ Виды фишинговых атак</h2>
+      <p>Фишинг бывает разным. Вот основные виды, с которыми сталкиваются пользователи:</p>
+      <ul>
+        <li><strong>Массовый фишинг</strong> — рассылка одинаковых писем тысячам людей. Расчёт на то, что хоть кто-то окажется клиентом нужного банка или сервиса.</li>
+        <li><strong>Целевой фишинг (spear phishing)</strong> — атака направлена на конкретного человека. Мошенники заранее изучают жертву и составляют персонализированное письмо.</li>
+        <li><strong>Вишинг</strong> — фишинг по телефону. Звонят «из банка» или «техподдержки» и выманивают данные голосом.</li>
+        <li><strong>Смишинг</strong> — фишинг через SMS. «Ваша карта заблокирована, перейдите по ссылке...»</li>
+        <li><strong>Фарминг</strong> — перенаправление пользователя с настоящего сайта на поддельный без его ведома.</li>
+        <li><strong>Клон-фишинг</strong> — точная копия настоящего письма, в которой ссылки заменены на вредоносные.</li>
+      </ul>
+      <div class="highlight-box">
+        <strong>Запомни:</strong> фишинговые атаки постоянно эволюционируют. Новые схемы появляются регулярно.
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="goLesson(0)">← Назад</button>
+      <button class="btn-primary" onclick="nextLesson(1)">Далее →</button>
+    </div>
+  </div>
+
+  <!-- LESSON 2: Как распознать -->
+  <div id="lesson2" class="hidden">
+    <div class="card">
+      <h2>🔍 Как распознать фишинг?</h2>
+      <p>Научившись замечать «красные флаги», ты сможешь избежать большинства фишинговых атак:</p>
+      <ol>
+        <li><strong>Подозрительный адрес отправителя.</strong> Например, вместо <code>support@sberbank.ru</code> может быть <code>support@sberbank-secure.ru</code>. Всегда проверяй домен.</li>
+        <li><strong>Срочность и угрозы.</strong> «Ваш аккаунт заблокируют через 24 часа!» — классическая манипуляция, чтобы ты не успел подумать.</li>
+        <li><strong>Подозрительные ссылки.</strong> Наведи мышку на ссылку — в строке состояния браузера появится реальный адрес. Если он отличается от ожидаемого — не кликай!</li>
+        <li><strong>Запрос конфиденциальных данных.</strong> Ни один банк или серьёзный сервис не попросит пароль или CVV-код по почте.</li>
+        <li><strong>Ошибки и кривой дизайн.</strong> Орфографические ошибки, «поехавшие» логотипы и странное форматирование — признаки подделки.</li>
+      </ol>
+      <div class="danger-box">
+        <strong>Пример:</strong> ты получил письмо от «ExeStore» — популярного магазина одежды — с темой «Ваш заказ отменён, подтвердите данные карты». Проверь адрес отправителя — если вместо <em>info@exestore.ru</em> написано что-то вроде <em>info@exestore-support.net</em>, это фишинг!
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="goLesson(1)">← Назад</button>
+      <button class="btn-primary" onclick="nextLesson(2)">Далее →</button>
+    </div>
+  </div>
+
+  <!-- LESSON 3: Как защититься -->
+  <div id="lesson3" class="hidden">
+    <div class="card">
+      <h2>🛡️ Как защититься от фишинга?</h2>
+      <div class="success-box"><strong>Хорошая новость:</strong> защититься от фишинга реально — достаточно знать правила и соблюдать их.</div>
+      <p><strong>Технические меры:</strong></p>
+      <ul>
+        <li>Включи <strong>двухфакторную аутентификацию (2FA)</strong> на всех важных аккаунтах.</li>
+        <li>Используй <strong>антивирус</strong> с функцией веб-фильтрации.</li>
+        <li>Не игнорируй <strong>предупреждения браузера</strong> о подозрительных сайтах.</li>
+        <li>Используй <strong>менеджер паролей</strong> — он не предложит ввести данные на поддельном сайте.</li>
+        <li>Проверяй наличие <strong>HTTPS</strong> и замочка в адресной строке.</li>
+      </ul>
+      <p><strong>Поведенческие меры:</strong></p>
+      <ul>
+        <li>Никогда не переходи по ссылкам из подозрительных писем — открывай сайт вручную.</li>
+        <li>Используй <strong>уникальные пароли</strong> для разных сервисов.</li>
+        <li>Регулярно <strong>обновляй программы</strong> — уязвимости старых версий используются мошенниками.</li>
+        <li>Если сомневаешься — позвони в компанию по <strong>официальному номеру</strong> телефона.</li>
+        <li>Думай критически: если предложение кажется слишком хорошим — скорее всего, это ловушка.</li>
+      </ul>
+      <div class="highlight-box"><strong>Главное правило:</strong> остановись и подумай, прежде чем вводить личные данные или переходить по ссылке.</div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="goLesson(2)">← Назад</button>
+      <button class="btn-success" onclick="finishLearning()">✅ Обучение пройдено — открыть тест</button>
+    </div>
+  </div>
+
+  <!-- TEST LOCKED -->
+  <div id="screenTestLocked" class="hidden">
+    <div class="card">
+      <div class="lock-msg">
+        <div class="lock-icon">🔒</div>
+        <h3 style="margin-bottom:10px;">Тест пока недоступен</h3>
+        <p>Сначала пройди все разделы обучения, и тест откроется автоматически.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEST -->
+  <div id="screenTest" class="hidden">
+    <div class="card">
+      <h2>📝 Тест: Проверь свои знания</h2>
+      <div class="quiz-counter" id="quizCounter"></div>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <div class="options" id="quizOptions"></div>
+      <div class="feedback hidden" id="quizFeedback"></div>
+    </div>
+    <div class="nav-row" id="quizNav"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screenResults" class="hidden">
+    <div class="card" style="text-align:center;">
+      <h2 style="justify-content:center;">🏆 Результаты теста</h2>
+      <div id="resultCircle" class="result-circle" style="margin-top:12px;"></div>
+      <div id="resultMsg" style="font-size:1.1rem;color:var(--gray);margin-bottom:20px;"></div>
+      <div id="resultDetails" style="text-align:left;margin-top:16px;"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="restartTest()">🔄 Пройти тест снова</button>
+      <button class="btn-primary" onclick="goToStart()">🏠 На главную</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Сайт <strong>Коробейникова Ивана</strong>, созданный в рамках индивидуального проекта по инф.безопасности.<br>
+  <small>ExeStore</small>
+</footer>
+
+<script>
+const LESSONS = ['lesson0','lesson1','lesson2','lesson3'];
+const LESSON_NAMES = ['Что такое фишинг','Виды атак','Как распознать','Как защититься'];
+let completedLessons = new Set();
+let testUnlocked = false;
+
+const QUESTIONS = [
+  {
+    q: "Что такое фишинг?",
+    options: [
+      "Вид спортивной рыбалки в интернете",
+      "Мошенничество, цель которого — выманить личные данные пользователя",
+      "Программа для защиты компьютера",
+      "Метод взлома серверов через технические уязвимости"
+    ],
+    correct: 1,
+    explain: "Фишинг — это вид интернет-мошенничества, направленный на кражу конфиденциальных данных через обман пользователя."
+  },
+  {
+    q: "Ты получил письмо якобы от интернет-магазина одежды ExeStore: «Срочно! Ваш заказ №4521 отменён из-за ошибки оплаты. Введите данные карты по ссылке: exestore-cancel-help.ru». Что ты сделаешь?",
+    options: [
+      "Немедленно перейду по ссылке и введу данные карты — заказ важен",
+      "Проигнорирую письмо и зайду на официальный сайт ExeStore самостоятельно",
+      "Отвечу на письмо и попрошу подробности",
+      "Нажму «Отписаться» внизу письма"
+    ],
+    correct: 1,
+    explain: "Правильно! Никогда не переходи по ссылкам из подозрительных писем. Открывай официальный сайт вручную в браузере."
+  },
+  {
+    q: "Какой из признаков НЕ является типичным для фишингового письма?",
+    options: [
+      "Требование срочно ввести пароль в течение 2 часов",
+      "Письмо отправлено с адреса bank@bankname.ru вместо bankname@bankname.ru",
+      "Наличие логотипа компании и корректного дизайна",
+      "Ссылка ведёт на сайт с адресом, отличающимся от официального"
+    ],
+    correct: 2,
+    explain: "Наличие логотипа само по себе не является признаком фишинга — мошенники легко копируют дизайн. Это скорее нейтральный признак, требующий проверки других деталей."
+  },
+  {
+    q: "Что такое «смишинг»?",
+    options: [
+      "Фишинг через поддельные Wi-Fi сети",
+      "Фишинг через SMS-сообщения",
+      "Фишинг через телефонные звонки",
+      "Фишинг через QR-коды"
+    ],
+    correct: 1,
+    explain: "Смишинг (SMS phishing) — это фишинг через текстовые сообщения. Классический пример: «Ваша карта заблокирована, перейдите по ссылке...»"
+  },
+  {
+    q: "Покупательница Мария заходит на сайт avito, чтобы оформить заказ. В адресной строке она видит: http://avito.ru. Что должно её насторожить?",
+    options: [
+      "Ничего, всё выглядит нормально",
+      "Отсутствие протокола HTTPS — сайт использует незащищённое соединение",
+      "Слишком большой ассортимент одежды",
+      "Необходимость создать аккаунт"
+    ],
+    correct: 1,
+    explain: "Сайты, на которых вводятся личные данные, должны использовать HTTPS. HTTP — незащищённое соединение, данные могут быть перехвачены."
+  },
+  {
+    q: "Какой метод защиты помогает даже в том случае, если злоумышленник узнал твой пароль?",
+    options: [
+      "Использование сложного пароля из букв и цифр",
+      "Двухфакторная аутентификация (2FA)",
+      "Регулярная смена пароля",
+      "Использование разных браузеров для разных сайтов"
+    ],
+    correct: 1,
+    explain: "2FA требует не только пароль, но и одноразовый код из SMS или приложения. Даже зная пароль, злоумышленник не сможет войти без этого кода."
+  },
+  {
+    q: "Другу пришло письмо от магазина "ТехТовары"  о распродаже, и он уже собирается перейти по ссылке. Адрес отправителя: sales@tech-promo.online. Что ты посоветуешь?",
+    options: [
+      "Переходить — распродажи бывают на любых сайтах",
+      "Подождать, пока сайт не откроется сам",
+      "Не переходить: домен .online вместо .ru и дополнительное слово в адресе — признаки фишинга",
+      "Перейти, но не вводить данные карты"
+    ],
+    correct: 2,
+    explain: "Правильно! Официальный домен ТехТовары — не .online и без лишних слов. Подозрительный домен — явный признак фишинга. Нужно зайти на официальный сайт вручную."
+  },
+  {
+    q: "Что такое «фарминг»?",
+    options: [
+      "Рассылка фишинговых писем по электронной почте",
+      "Перенаправление пользователя с легитимного сайта на поддельный без его ведома",
+      "Фишинг через фальшивые приложения в магазинах",
+      "Создание копий официальных страниц в социальных сетях"
+    ],
+    correct: 1,
+    explain: "Фарминг — технически сложная атака: пользователь вводит правильный адрес сайта, но оказывается на поддельном ресурсе из-за подмены DNS или изменения файла hosts."
+  },
+  {
+    q: "Менеджер паролей — это хорошая защита от фишинга, потому что:",
+    options: [
+      "Он шифрует все файлы на компьютере",
+      "Он автоматически подставляет пароли только на тех сайтах, для которых создана запись — на поддельном сайте этого не произойдёт",
+      "Он блокирует все подозрительные письма",
+      "Он создаёт резервную копию паролей в облаке"
+    ],
+    correct: 1,
+    explain: "Именно так! Если ты оказался на фишинговом сайте-клоне, менеджер паролей не предложит ввести данные, потому что домен не совпадает с записью. Это работает как дополнительная защита."
+  },
+  {
+    q: "Ты получил звонок: «Добрый день, служба безопасности Т-банк. Мы зафиксировали взлом вашего аккаунта. Назовите код из SMS для блокировки мошенников». Что делать?",
+    options: [
+      "Назвать код — это же служба безопасности",
+      "Положить трубку, никогда не называть коды из SMS по телефону и при необходимости самостоятельно позвонить в поддержку Т-банк",
+      "Попросить перезвонить позже",
+      "Продиктовать только первые три цифры кода"
+    ],
+    correct: 1,
+    explain: "Это классический вишинг! Настоящая служба безопасности никогда не попросит назвать код из SMS — это одноразовый пароль для входа в аккаунт. Повесить трубку и позвонить самостоятельно — единственно верное решение."
+  }
+];
+
+let currentLesson = -1;
+let quizAnswers = [];
+let currentQ = 0;
+let answered = false;
+
+function updateProgress() {
+  const total = LESSONS.length + 1; 
+  const done = completedLessons.size + (testUnlocked ? (quizAnswers.length > 0 ? 1 : 0) : 0);
+  const pct = Math.round((completedLessons.size / (LESSONS.length)) * 80 + (testUnlocked ? 20 : 0));
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPercent').textContent = pct + '%';
+  const labels = ['Начало обучения', 'Изучаем фишинг...', 'Изучаем виды атак...', 'Учимся распознавать...', 'Изучаем защиту...', 'Тест разблокирован!'];
+  document.getElementById('progressLabel').textContent = labels[Math.min(completedLessons.size, labels.length-1)];
+}
+
+function updateTabs() {
+  const tabs = document.getElementById('sectionTabs');
+  tabs.innerHTML = '';
+  LESSON_NAMES.forEach((name, i) => {
+    const t = document.createElement('div');
+    t.className = 'section-tab' + (completedLessons.has(i) ? ' done' : '') + (currentLesson === i ? ' active' : '');
+    t.textContent = (completedLessons.has(i) ? '✓ ' : '') + name;
+    tabs.appendChild(t);
+  });
+  const tt = document.createElement('div');
+  tt.className = 'section-tab' + (testUnlocked ? ' done' : '');
+  tt.textContent = (testUnlocked ? '🔓 ' : '🔒 ') + 'Тест';
+  tabs.appendChild(tt);
+}
+
+function hideAll() {
+  ['screenIntro','screenTestLocked','screenTest','screenResults'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  LESSONS.forEach(id => document.getElementById(id).classList.add('hidden'));
+}
+
+function show(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
+
+function startLearning() { currentLesson = 0; show('lesson0'); updateTabs(); updateProgress(); }
+
+function goLesson(i) { currentLesson = i; show(LESSONS[i]); updateTabs(); updateProgress(); }
+
+function nextLesson(i) {
+  completedLessons.add(i);
+  if (i + 1 < LESSONS.length) {
+    currentLesson = i + 1;
+    show(LESSONS[i + 1]);
+  }
+  updateTabs();
+  updateProgress();
+}
+
+function finishLearning() {
+  completedLessons.add(3);
+  testUnlocked = true;
+  updateTabs();
+  updateProgress();
+  startTest();
+}
+
+function startTest() {
+  currentQ = 0;
+  quizAnswers = [];
+  show('screenTest');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  document.getElementById('quizCounter').textContent = `Вопрос ${currentQ + 1} из ${QUESTIONS.length}`;
+  document.getElementById('quizQuestion').textContent = q.q;
+  document.getElementById('quizFeedback').className = 'feedback hidden';
+  document.getElementById('quizFeedback').textContent = '';
+  answered = false;
+  const optDiv = document.getElementById('quizOptions');
+  optDiv.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i, btn);
+    optDiv.appendChild(btn);
+  });
+  const nav = document.getElementById('quizNav');
+  nav.innerHTML = '';
+}
+
+function selectAnswer(idx, btn) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[currentQ];
+  const isCorrect = idx === q.correct;
+  quizAnswers.push({ correct: isCorrect, selected: idx });
+  document.querySelectorAll('.option').forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === idx && !isCorrect) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'feedback ' + (isCorrect ? 'ok' : 'fail');
+  fb.textContent = (isCorrect ? '✅ Правильно! ' : '❌ Неверно. ') + q.explain;
+
+  const nav = document.getElementById('quizNav');
+  nav.innerHTML = '';
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'btn-primary';
+  if (currentQ + 1 < QUESTIONS.length) {
+    nextBtn.textContent = 'Следующий вопрос →';
+    nextBtn.onclick = () => { currentQ++; renderQuestion(); };
+  } else {
+    nextBtn.textContent = '🏁 Завершить тест';
+    nextBtn.onclick = showResults;
+  }
+  nav.appendChild(nextBtn);
+}
+
+function showResults() {
+  show('screenResults');
+  const score = quizAnswers.filter(a => a.correct).length;
+  const pct = Math.round(score / QUESTIONS.length * 100);
+  const circle = document.getElementById('resultCircle');
+  let color = '#dc2626', bg = '#fef2f2';
+  if (pct >= 80) { color = '#059669'; bg = '#f0fdf4'; }
+  else if (pct >= 50) { color = '#d97706'; bg = '#fffbeb'; }
+  circle.style.background = bg;
+  circle.style.border = `5px solid ${color}`;
+  circle.innerHTML = `<div class="result-score" style="color:${color}">${score}</div><div class="result-total" style="color:${color}">из ${QUESTIONS.length}</div>`;
+
+  let msg = '';
+  if (pct === 100) msg = '🎉 Отлично! Теперь ты разбираешься в фишинге!';
+  else if (pct >= 80) msg = '👏 Отличный результат!.';
+  else if (pct >= 50) msg = '😊 Неплохо, но есть что повторить. Пройди обучение ещё раз!';
+  else msg = '📖 Стоит повторить материал — перечитай обучающие разделы и попробуй снова.';
+  document.getElementById('resultMsg').textContent = msg;
+
+  let html = '<p style="font-weight:700;margin-bottom:12px;">Разбор ответов:</p>';
+  QUESTIONS.forEach((q, i) => {
+    const a = quizAnswers[i];
+    const icon = a.correct ? '✅' : '❌';
+    html += `<div style="margin-bottom:10px;padding:10px 14px;background:${a.correct ? '#f0fdf4':'#fef2f2'};border-radius:8px;font-size:.88rem;">
+      <strong>${icon} Вопрос ${i+1}:</strong> ${q.q.slice(0,60)}...<br>
+      <span style="color:var(--gray)">Правильный ответ: ${q.options[q.correct]}</span>
+    </div>`;
+  });
+  document.getElementById('resultDetails').innerHTML = html;
+  updateProgress();
+}
+
+function restartTest() { startTest(); }
+function goToStart() { currentLesson = -1; completedLessons.clear(); testUnlocked = false; quizAnswers = []; show('screenIntro'); updateTabs(); updateProgress(); }
+
+
+updateTabs();
+updateProgress();
+</script>
+</body>
+</html>
