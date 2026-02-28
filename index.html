@@ -29,13 +29,13 @@
 
   .container { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
 
-  /* Progress bar */
+  
   .progress-wrap { background: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
   .progress-label { display: flex; justify-content: space-between; font-size: .85rem; color: var(--gray); margin-bottom: 8px; }
   .progress-bar { background: var(--border); border-radius: 99px; height: 10px; overflow: hidden; }
   .progress-fill { background: linear-gradient(90deg, #1a56db, #06b6d4); height: 100%; border-radius: 99px; transition: width .4s ease; }
 
-  /* Cards */
+  
   .card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 6px rgba(0,0,0,.09); margin-bottom: 20px; }
   .card h2 { font-size: 1.4rem; color: var(--blue); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
   .card p { line-height: 1.75; color: var(--gray); margin-bottom: 12px; }
@@ -48,7 +48,7 @@
 
   .tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: .78rem; font-weight: 600; padding: 3px 10px; border-radius: 99px; margin: 3px; }
 
-  /* Navigation */
+  
   .nav-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
   button { cursor: pointer; border: none; border-radius: 8px; font-size: .95rem; font-weight: 600; padding: 11px 24px; transition: all .2s; }
   .btn-primary { background: var(--blue); color: white; }
@@ -59,13 +59,13 @@
   .btn-success:hover { background: #047857; }
   .btn-disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
 
-  /* Section tabs */
+  
   .section-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
   .section-tab { padding: 7px 16px; border-radius: 8px; font-size: .85rem; font-weight: 600; border: 2px solid var(--border); background: white; color: var(--gray); cursor: default; }
   .section-tab.done { border-color: var(--green); color: var(--green); background: #f0fdf4; }
   .section-tab.active { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
 
-  /* Quiz */
+  
   .quiz-question { font-size: 1.1rem; font-weight: 600; margin-bottom: 18px; line-height: 1.5; }
   .quiz-counter { font-size: .85rem; color: var(--gray); margin-bottom: 8px; }
   .options { display: flex; flex-direction: column; gap: 10px; }
@@ -78,12 +78,12 @@
   .feedback.ok { background: #f0fdf4; color: #065f46; }
   .feedback.fail { background: #fef2f2; color: #991b1b; }
 
-  /* Results */
+  
   .result-circle { width: 130px; height: 130px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; }
   .result-score { font-size: 2.4rem; font-weight: 800; line-height: 1; }
   .result-total { font-size: 1rem; opacity: .8; }
 
-  /* Intro */
+  
   .intro-hero { text-align: center; padding: 16px 0 8px; }
   .intro-hero .icon { font-size: 4rem; margin-bottom: 12px; }
   .intro-hero h2 { font-size: 2rem; color: var(--dark); margin-bottom: 12px; }
@@ -274,8 +274,8 @@
 </div>
 
 <footer>
-  Сайт создан <strong>Коробейниковым Иваном</strong> в рамках индивидуального проекта по информационной безопасности.<br>
-  Тема проекта: «Что такое фишинг и как с ним бороться»
+  Сайт <strong>Коробейникова Ивана</strong>, созданный в рамках индивидуального проекта по инф.безопасности.<br>
+  <small>ExeStore</small>
 </footer>
 
 <script>
@@ -330,7 +330,7 @@ const QUESTIONS = [
     explain: "Смишинг (SMS phishing) — это фишинг через текстовые сообщения. Классический пример: «Ваша карта заблокирована, перейдите по ссылке...»"
   },
   {
-    q: "Покупательница Мария заходит на сайт ExeStore, чтобы оформить заказ. В адресной строке она видит: http://exestore.ru. Что должно её насторожить?",
+    q: "Покупательница Мария заходит на сайт avito, чтобы оформить заказ. В адресной строке она видит: http://avito.ru. Что должно её насторожить?",
     options: [
       "Ничего, всё выглядит нормально",
       "Отсутствие протокола HTTPS — сайт использует незащищённое соединение",
@@ -352,7 +352,7 @@ const QUESTIONS = [
     explain: "2FA требует не только пароль, но и одноразовый код из SMS или приложения. Даже зная пароль, злоумышленник не сможет войти без этого кода."
   },
   {
-    q: "Другу пришло письмо «от ExeStore» о распродаже, и он уже собирается перейти по ссылке. Адрес отправителя: sales@exestore-promo.online. Что ты посоветуешь?",
+    q: "Другу пришло письмо от магазина "ТехТовары"  о распродаже, и он уже собирается перейти по ссылке. Адрес отправителя: sales@tech-promo.online. Что ты посоветуешь?",
     options: [
       "Переходить — распродажи бывают на любых сайтах",
       "Подождать, пока сайт не откроется сам",
@@ -403,7 +403,7 @@ let currentQ = 0;
 let answered = false;
 
 function updateProgress() {
-  const total = LESSONS.length + 1; // lessons + test
+  const total = LESSONS.length + 1; 
   const done = completedLessons.size + (testUnlocked ? (quizAnswers.length > 0 ? 1 : 0) : 0);
   const pct = Math.round((completedLessons.size / (LESSONS.length)) * 80 + (testUnlocked ? 20 : 0));
   document.getElementById('progressFill').style.width = pct + '%';
