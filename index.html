@@ -392,7 +392,9 @@
 </footer>
 
 <script>
-
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
 const SB_URL = 'https://iwzrfhwpzjvkelppmzoa.supabase.co';
 const SB_KEY = 'sb_publishable_B-AQ6bykM4Kr--eBRkPZAw_FIRIaopv';
 
@@ -413,7 +415,7 @@ async function sbFetch(path, method = 'GET', body = null) {
   return text ? JSON.parse(text) : null;
 }
 
-
+// Результаты
 async function getResults() {
   try {
     const data = await sbFetch('/rest/v1/results?select=*&order=id.asc');
@@ -431,7 +433,7 @@ async function clearAllResults() {
   } catch(e) { console.error('clearResults:', e); }
 }
 
-// пароль храится в таблице settings 
+// Пароль — хранится в таблице settings (общий для всех устройств)
 async function getAdminPass() {
   try {
     const data = await sbFetch('/rest/v1/settings?key=eq.admin_password&select=value');
@@ -444,7 +446,9 @@ async function setAdminPass(newPass) {
   } catch(e) { console.error('setAdminPass:', e); }
 }
 
-
+// ============================================================
+// LESSONS / QUIZ LOGIC
+// ============================================================
 const LESSONS = ['lesson0','lesson1','lesson2','lesson3'];
 const LESSON_NAMES = ['Что такое фишинг','Виды атак','Как распознать','Как защититься'];
 let completedLessons = new Set();
@@ -455,7 +459,7 @@ let quizAnswers = [];
 let currentQ = 0;
 let answered = false;
 let currentUserName = '';
-let nameModalMode = 'learning'; 
+let nameModalMode = 'learning'; // 'learning' or 'test'
 
 const QUESTIONS = [
   { q: "Что такое фишинг?", options: ["Вид спортивной рыбалки в интернете","Мошенничество, цель которого — выманить личные данные пользователя","Программа для защиты компьютера","Метод взлома серверов через технические уязвимости"], correct: 1, explain: "Фишинг — вид интернет-мошенничества, направленный на кражу конфиденциальных данных через обман пользователя." },
@@ -519,7 +523,9 @@ function finishLearning() {
 function restartTest() { openNameModal('test'); }
 function goToStart() { currentLesson = -1; completedLessons.clear(); testUnlocked = false; quizAnswers = []; currentUserName = ''; show('screenIntro'); updateTabs(); updateProgress(); }
 
-
+// ============================================================
+// NAME MODAL
+// ============================================================
 function openNameModal(mode) {
   nameModalMode = mode || 'learning';
   document.getElementById('userName').value = currentUserName || '';
@@ -537,7 +543,7 @@ function confirmName() {
   const name = document.getElementById('userName').value.trim();
   if (!name) { document.getElementById('nameError').textContent = 'Пожалуйста, введите имя'; return; }
   currentUserName = name;
-  
+  // Update intro welcome text if visible
   const wt = document.getElementById('introWelcomeText');
   if (wt) wt.textContent = `Привет, ${name}! Этот сайт поможет тебе понять, что такое фишинг, как его распознать и защитить свои данные.`;
   document.getElementById('nameModal').classList.remove('open');
@@ -545,6 +551,9 @@ function confirmName() {
   else { startLearning(); }
 }
 
+// ============================================================
+// QUIZ
+// ============================================================
 function startTest() {
   currentQ = 0; quizAnswers = [];
   show('screenTest');
@@ -624,7 +633,7 @@ async function showResults() {
   });
   document.getElementById('resultDetails').innerHTML = html;
 
-  
+  // Save result to Supabase
   await addResult({
     name: currentUserName || 'Аноним',
     score: score,
@@ -634,7 +643,9 @@ async function showResults() {
   updateProgress();
 }
 
-
+// ============================================================
+// ADMIN AUTH
+// ============================================================
 function openAdminFlow() {
   if (isAdmin) { openAdminPanel(); return; }
   openModal('loginModal');
@@ -671,6 +682,9 @@ function logoutAdmin() {
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+// ============================================================
+// ADMIN PANEL
+// ============================================================
 async function openAdminPanel() {
   show('screenAdmin');
   await renderAdminStats();
@@ -726,6 +740,10 @@ async function clearResults() {
   await renderAdminStats();
   await renderAdminResults();
 }
+
+// ============================================================
+// CHANGE PASSWORD
+// ============================================================
 async function changePassword() {
   const oldPass = document.getElementById('oldPass').value;
   const newPass = document.getElementById('newPass').value;
@@ -746,4 +764,22 @@ async function changePassword() {
   setTimeout(() => { err.textContent = ''; err.style.color = 'var(--red)'; }, 3000);
 }
 
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
+// ============================================================
+// UTILS
+// ============================================================
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay && overlay.id !== 'nameModal') closeModal(overlay.id);
+  });
+});
+
+// Init
+updateTabs();
+updateProgress();
+updateAdminUI();
+</script>
+</body>
+</html>
