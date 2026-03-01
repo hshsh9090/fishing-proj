@@ -275,7 +275,7 @@
         <li><strong>Ошибки и кривой дизайн.</strong> Признаки подделки.</li>
       </ol>
       <div class="danger-box">
-        <strong>Пример:</strong> письмо от «ExeStore» с темой «Ваш заказ отменён, подтвердите данные карты». Если адрес отправителя <em><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="473432373728353307223f2234332835226a2f222b37693532">[email&#160;protected]</a></em> вместо <em><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="01727471716e73754164796472756e73642f7374">[email&#160;protected]</a></em> — это фишинг!
+        <strong>Пример:</strong> письмо от «ExeStore» с темой «Ваш заказ отменён, подтвердите данные карты». Если адрес отправителя <em>support@exestore-help.ru</em> вместо <em>support@exestore.ru</em> — это фишинг!
       </div>
     </div>
     <div class="nav-row">
@@ -375,7 +375,7 @@
   <small>ExeStore</small>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const SB_URL = 'https://iwzrfhwpzjvkelppmzoa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3enJmaHdwemp2a2VscHBtem9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMjkwODAsImV4cCI6MjA4NzkwNTA4MH0.Ee0221rNV5-C0KVXigeEg64LEa_ttWqsfiGPoaXJ5So';
 
@@ -717,4 +717,17 @@ async function changePassword() {
   setTimeout(() => { err.textContent = ''; err.style.color = 'var(--red)'; }, 3000);
 }
 
-function escHtml(s) { return String(s).replace(/&/
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay && overlay.id !== 'nameModal') closeModal(overlay.id);
+  });
+});
+
+updateTabs();
+updateProgress();
+updateAdminUI();
+</script>
+</body>
+</html>
