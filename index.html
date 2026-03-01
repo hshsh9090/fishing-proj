@@ -172,7 +172,6 @@
   <button class="admin-btn" id="headerAdminBtn" onclick="openAdminFlow()">⚙️ Admin</button>
 </header>
 
-<!-- Admin login modal -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
     <h3>🔐 Вход для администратора</h3>
@@ -186,7 +185,6 @@
   </div>
 </div>
 
-<!-- Name modal before test -->
 <div class="modal-overlay" id="nameModal">
   <div class="modal">
     <h3>👋 Добро пожаловать!</h3>
@@ -201,7 +199,6 @@
 
 <div class="container">
 
-  <!-- Progress -->
   <div class="progress-wrap">
     <div class="progress-label">
       <span id="progressLabel">Начало обучения</span>
@@ -210,10 +207,8 @@
     <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   </div>
 
-  <!-- Section tabs -->
   <div class="section-tabs" id="sectionTabs"></div>
 
-  <!-- SCREENS -->
   <div id="screenIntro">
     <div class="card">
       <div class="intro-hero">
@@ -230,7 +225,6 @@
     <div class="nav-row"><button class="btn-primary" onclick="openNameModal()">Начать обучение →</button></div>
   </div>
 
-  <!-- LESSON 0 -->
   <div id="lesson0" class="hidden">
     <div class="card">
       <h2>🎣 Что такое фишинг?</h2>
@@ -247,7 +241,6 @@
     <div class="nav-row"><button class="btn-primary" onclick="nextLesson(0)">Далее →</button></div>
   </div>
 
-  <!-- LESSON 1 -->
   <div id="lesson1" class="hidden">
     <div class="card">
       <h2>🕵️ Виды фишинговых атак</h2>
@@ -270,7 +263,6 @@
     </div>
   </div>
 
-  <!-- LESSON 2 -->
   <div id="lesson2" class="hidden">
     <div class="card">
       <h2>🔍 Как распознать фишинг?</h2>
@@ -283,7 +275,7 @@
         <li><strong>Ошибки и кривой дизайн.</strong> Признаки подделки.</li>
       </ol>
       <div class="danger-box">
-        <strong>Пример:</strong> письмо от «ExeStore» с темой «Ваш заказ отменён, подтвердите данные карты». Если адрес отправителя <em><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="61080f070e2104190412150e13044c121411110e13154f0f0415">[email&#160;protected]</a></em> вместо <em><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a0c9cec6cfe0c5d8c5d3d4cfd2c58ed2d5">[email&#160;protected]</a></em> — это фишинг!
+        <strong>Пример:</strong> письмо от «ExeStore» с темой «Ваш заказ отменён, подтвердите данные карты». Если адрес отправителя <em>support@exestore-help.ru</em> вместо <em>support@exestore.ru</em> — это фишинг!
       </div>
     </div>
     <div class="nav-row">
@@ -292,7 +284,6 @@
     </div>
   </div>
 
-  <!-- LESSON 3 -->
   <div id="lesson3" class="hidden">
     <div class="card">
       <h2>🛡️ Как защититься от фишинга?</h2>
@@ -319,7 +310,6 @@
     </div>
   </div>
 
-  <!-- TEST -->
   <div id="screenTest" class="hidden">
     <div class="card">
       <h2>📝 Тест: Проверь свои знания</h2>
@@ -331,7 +321,6 @@
     <div class="nav-row" id="quizNav"></div>
   </div>
 
-  <!-- RESULTS -->
   <div id="screenResults" class="hidden">
     <div class="card" style="text-align:center;">
       <h2 style="justify-content:center;">🏆 Результаты теста</h2>
@@ -345,18 +334,15 @@
     </div>
   </div>
 
-  <!-- ADMIN PANEL -->
   <div id="screenAdmin" class="hidden">
     <div class="card">
       <h2>⚙️ Панель администратора</h2>
 
-      <!-- Stats -->
       <div class="admin-section">
         <h3>📊 Статистика</h3>
         <div class="stats-row" id="adminStats"></div>
       </div>
 
-      <!-- Results -->
       <div class="admin-section">
         <h3>📋 Результаты прохождения теста</h3>
         <div class="clear-results-row">
@@ -365,7 +351,6 @@
         <div id="adminResultsWrap"></div>
       </div>
 
-      <!-- Change password -->
       <div class="admin-section">
         <h3>🔑 Изменить пароль администратора</h3>
         <div class="change-pass-form">
