@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -98,7 +99,7 @@
 
   .hidden { display: none; }
 
-  
+  /* ===== MODAL ===== */
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
     z-index: 1000; align-items: center; justify-content: center;
@@ -120,12 +121,12 @@
   .modal .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
   .modal .error-msg { color: var(--red); font-size: .85rem; margin-bottom: 10px; min-height: 20px; }
 
-  
+  /* ===== ADMIN PANEL ===== */
   #screenAdmin .card h2 { font-size: 1.6rem; }
   .admin-section { margin-bottom: 32px; }
   .admin-section h3 { font-size: 1.1rem; font-weight: 700; color: var(--dark); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 8px; }
 
-
+  /* Results table */
   .results-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
   table { width: 100%; border-collapse: collapse; font-size: .88rem; }
   th { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 700; color: var(--gray); border-bottom: 2px solid var(--border); white-space: nowrap; }
@@ -283,7 +284,7 @@
         <li><strong>Ошибки и кривой дизайн.</strong> Признаки подделки.</li>
       </ol>
       <div class="danger-box">
-        <strong>Пример:</strong> письмо от «ExeStore» с темой «Ваш заказ отменён, подтвердите данные карты». Если адрес отправителя <em>info@exestore-support.net</em> вместо <em>info@exestore.ru</em> — это фишинг!
+        <strong>Пример:</strong> письмо от «ExeStore» с темой «Ваш заказ отменён, подтвердите данные карты». Если адрес отправителя <em><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="61080f070e2104190412150e13044c121411110e13154f0f0415">[email&#160;protected]</a></em> вместо <em><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a0c9cec6cfe0c5d8c5d3d4cfd2c58ed2d5">[email&#160;protected]</a></em> — это фишинг!
       </div>
     </div>
     <div class="nav-row">
@@ -391,19 +392,63 @@
 </footer>
 
 <script>
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
+const SB_URL = 'https://iwzrfhwpzjvkelppmzoa.supabase.co';
+const SB_KEY = 'sb_publishable_B-AQ6bykM4Kr--eBRkPZAw_FIRIaopv';
 
-function getData(key, fallback) {
-  try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : fallback; }
-  catch { return fallback; }
+async function sbFetch(path, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(SB_URL + path, opts);
+  if (!res.ok) { const e = await res.text(); throw new Error(e); }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
-function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-const PASS_KEY = 'fishing_admin_pass';
-const RESULTS_KEY = 'fishing_results';
+// Результаты
+async function getResults() {
+  try {
+    const data = await sbFetch('/rest/v1/results?select=*&order=id.asc');
+    return data || [];
+  } catch(e) { console.error('getResults:', e); return []; }
+}
+async function addResult(row) {
+  try {
+    await sbFetch('/rest/v1/results', 'POST', row);
+  } catch(e) { console.error('addResult:', e); }
+}
+async function clearAllResults() {
+  try {
+    await sbFetch('/rest/v1/results?id=gte.0', 'DELETE');
+  } catch(e) { console.error('clearResults:', e); }
+}
 
-function getAdminPass() { return getData(PASS_KEY, 'admin123'); }
-function getResults()   { return getData(RESULTS_KEY, []); }
+// Пароль — хранится в таблице settings (общий для всех устройств)
+async function getAdminPass() {
+  try {
+    const data = await sbFetch('/rest/v1/settings?key=eq.admin_password&select=value');
+    return data && data[0] ? data[0].value : 'admin123';
+  } catch { return 'admin123'; }
+}
+async function setAdminPass(newPass) {
+  try {
+    await sbFetch('/rest/v1/settings?key=eq.admin_password', 'PATCH', { value: newPass });
+  } catch(e) { console.error('setAdminPass:', e); }
+}
 
+// ============================================================
+// LESSONS / QUIZ LOGIC
+// ============================================================
 const LESSONS = ['lesson0','lesson1','lesson2','lesson3'];
 const LESSON_NAMES = ['Что такое фишинг','Виды атак','Как распознать','Как защититься'];
 let completedLessons = new Set();
@@ -414,7 +459,7 @@ let quizAnswers = [];
 let currentQ = 0;
 let answered = false;
 let currentUserName = '';
-let nameModalMode = 'learning'; 
+let nameModalMode = 'learning'; // 'learning' or 'test'
 
 const QUESTIONS = [
   { q: "Что такое фишинг?", options: ["Вид спортивной рыбалки в интернете","Мошенничество, цель которого — выманить личные данные пользователя","Программа для защиты компьютера","Метод взлома серверов через технические уязвимости"], correct: 1, explain: "Фишинг — вид интернет-мошенничества, направленный на кражу конфиденциальных данных через обман пользователя." },
@@ -478,6 +523,9 @@ function finishLearning() {
 function restartTest() { openNameModal('test'); }
 function goToStart() { currentLesson = -1; completedLessons.clear(); testUnlocked = false; quizAnswers = []; currentUserName = ''; show('screenIntro'); updateTabs(); updateProgress(); }
 
+// ============================================================
+// NAME MODAL
+// ============================================================
 function openNameModal(mode) {
   nameModalMode = mode || 'learning';
   document.getElementById('userName').value = currentUserName || '';
@@ -503,6 +551,9 @@ function confirmName() {
   else { startLearning(); }
 }
 
+// ============================================================
+// QUIZ
+// ============================================================
 function startTest() {
   currentQ = 0; quizAnswers = [];
   show('screenTest');
@@ -554,7 +605,7 @@ function selectAnswer(idx) {
   nav.appendChild(nextBtn);
 }
 
-function showResults() {
+async function showResults() {
   show('screenResults');
   const score = quizAnswers.filter(a => a.correct).length;
   const pct = Math.round(score / QUESTIONS.length * 100);
@@ -582,37 +633,39 @@ function showResults() {
   });
   document.getElementById('resultDetails').innerHTML = html;
 
-  // Save result
-  const results = getResults();
-  results.push({
+  // Save result to Supabase
+  await addResult({
     name: currentUserName || 'Аноним',
     score: score,
     total: QUESTIONS.length,
-    pct: pct,
-    date: new Date().toLocaleString('ru-RU')
+    pct: pct
   });
-  setData(RESULTS_KEY, results);
   updateProgress();
 }
 
-
+// ============================================================
+// ADMIN AUTH
+// ============================================================
 function openAdminFlow() {
   if (isAdmin) { openAdminPanel(); return; }
   openModal('loginModal');
   setTimeout(() => document.getElementById('loginPassword').focus(), 100);
 }
 
-function tryLogin() {
+async function tryLogin() {
   const pass = document.getElementById('loginPassword').value;
-  if (pass === getAdminPass()) {
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '⏳ Проверяем...';
+  const correct = await getAdminPass();
+  if (pass === correct) {
     document.getElementById('loginPassword').value = '';
-    document.getElementById('loginError').textContent = '';
+    errEl.textContent = '';
     closeModal('loginModal');
     isAdmin = true;
     updateAdminUI();
     openAdminPanel();
   } else {
-    document.getElementById('loginError').textContent = '❌ Неверный пароль';
+    errEl.textContent = '❌ Неверный пароль';
     document.getElementById('loginPassword').value = '';
     document.getElementById('loginPassword').focus();
   }
@@ -629,15 +682,17 @@ function logoutAdmin() {
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-
-function openAdminPanel() {
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+async function openAdminPanel() {
   show('screenAdmin');
-  renderAdminStats();
-  renderAdminResults();
+  await renderAdminStats();
+  await renderAdminResults();
 }
 
-function renderAdminStats() {
-  const results = getResults();
+async function renderAdminStats() {
+  const results = await getResults();
   const total = results.length;
   const avg = total ? Math.round(results.reduce((s, r) => s + r.pct, 0) / total) : 0;
   const passed = results.filter(r => r.pct >= 80).length;
@@ -649,9 +704,10 @@ function renderAdminStats() {
   `;
 }
 
-function renderAdminResults() {
-  const results = getResults();
+async function renderAdminResults() {
   const wrap = document.getElementById('adminResultsWrap');
+  wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">⏳</div><p>Загрузка...</p></div>`;
+  const results = await getResults();
   if (!results.length) {
     wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>Результатов пока нет</p></div>`;
     return;
@@ -660,13 +716,14 @@ function renderAdminResults() {
   [...results].reverse().forEach((r, i) => {
     let badgeCls = r.pct >= 80 ? 'badge-green' : r.pct >= 50 ? 'badge-yellow' : 'badge-red';
     let label = r.pct >= 80 ? 'Сдал' : r.pct >= 50 ? 'Частично' : 'Не сдал';
+    const date = r.created_at ? new Date(r.created_at).toLocaleString('ru-RU') : '—';
     rows += `<tr>
       <td>${results.length - i}</td>
       <td><strong>${escHtml(r.name)}</strong></td>
       <td>${r.score} / ${r.total}</td>
       <td>${r.pct}%</td>
       <td><span class="badge ${badgeCls}">${label}</span></td>
-      <td style="color:var(--gray);font-size:.82rem;">${r.date}</td>
+      <td style="color:var(--gray);font-size:.82rem;">${date}</td>
     </tr>`;
   });
   wrap.innerHTML = `<div class="results-table-wrap">
@@ -677,45 +734,37 @@ function renderAdminResults() {
   </div>`;
 }
 
-function clearResults() {
+async function clearResults() {
   if (!confirm('Удалить все результаты теста?')) return;
-  setData(RESULTS_KEY, []);
-  renderAdminStats();
-  renderAdminResults();
+  await clearAllResults();
+  await renderAdminStats();
+  await renderAdminResults();
 }
 
-function changePassword() {
+// ============================================================
+// CHANGE PASSWORD
+// ============================================================
+async function changePassword() {
   const oldPass = document.getElementById('oldPass').value;
   const newPass = document.getElementById('newPass').value;
   const confirmPass = document.getElementById('confirmPass').value;
   const err = document.getElementById('passChangeError');
-  err.textContent = '';
-  if (oldPass !== getAdminPass()) { err.textContent = '❌ Текущий пароль неверный'; return; }
+  err.style.color = 'var(--red)';
+  err.textContent = '⏳ Проверяем...';
+  const correct = await getAdminPass();
+  if (oldPass !== correct) { err.textContent = '❌ Текущий пароль неверный'; return; }
   if (newPass.length < 4) { err.textContent = '❌ Пароль должен быть не короче 4 символов'; return; }
   if (newPass !== confirmPass) { err.textContent = '❌ Пароли не совпадают'; return; }
-  setData(PASS_KEY, newPass);
+  await setAdminPass(newPass);
   document.getElementById('oldPass').value = '';
   document.getElementById('newPass').value = '';
   document.getElementById('confirmPass').value = '';
   err.style.color = 'var(--green)';
-  err.textContent = '✅ Пароль успешно изменён';
+  err.textContent = '✅ Пароль изменён для всех устройств';
   setTimeout(() => { err.textContent = ''; err.style.color = 'var(--red)'; }, 3000);
 }
 
-
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// Close modal on overlay click
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay && overlay.id !== 'nameModal') closeModal(overlay.id);
-  });
-});
-
-
-updateTabs();
-updateProgress();
-updateAdminUI();
-</script>
-</body>
-</html>
+// ============================================================
+// UTILS
+// ============================================================
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
