@@ -98,7 +98,7 @@
 
   .hidden { display: none; }
 
-  /* ===== MODAL ===== */
+  
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
     z-index: 1000; align-items: center; justify-content: center;
@@ -120,12 +120,12 @@
   .modal .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
   .modal .error-msg { color: var(--red); font-size: .85rem; margin-bottom: 10px; min-height: 20px; }
 
-  /* ===== ADMIN PANEL ===== */
+  
   #screenAdmin .card h2 { font-size: 1.6rem; }
   .admin-section { margin-bottom: 32px; }
   .admin-section h3 { font-size: 1.1rem; font-weight: 700; color: var(--dark); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 8px; }
 
-  /* Results table */
+
   .results-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
   table { width: 100%; border-collapse: collapse; font-size: .88rem; }
   th { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 700; color: var(--gray); border-bottom: 2px solid var(--border); white-space: nowrap; }
@@ -391,25 +391,19 @@
 </footer>
 
 <script>
-// ============================================================
-// STORAGE HELPERS
-// ============================================================
+
 function getData(key, fallback) {
   try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : fallback; }
   catch { return fallback; }
 }
 function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-// Admin password (stored in localStorage, default: admin123)
 const PASS_KEY = 'fishing_admin_pass';
 const RESULTS_KEY = 'fishing_results';
 
 function getAdminPass() { return getData(PASS_KEY, 'admin123'); }
 function getResults()   { return getData(RESULTS_KEY, []); }
 
-// ============================================================
-// LESSONS / QUIZ LOGIC
-// ============================================================
 const LESSONS = ['lesson0','lesson1','lesson2','lesson3'];
 const LESSON_NAMES = ['Что такое фишинг','Виды атак','Как распознать','Как защититься'];
 let completedLessons = new Set();
@@ -420,7 +414,7 @@ let quizAnswers = [];
 let currentQ = 0;
 let answered = false;
 let currentUserName = '';
-let nameModalMode = 'learning'; // 'learning' or 'test'
+let nameModalMode = 'learning'; 
 
 const QUESTIONS = [
   { q: "Что такое фишинг?", options: ["Вид спортивной рыбалки в интернете","Мошенничество, цель которого — выманить личные данные пользователя","Программа для защиты компьютера","Метод взлома серверов через технические уязвимости"], correct: 1, explain: "Фишинг — вид интернет-мошенничества, направленный на кражу конфиденциальных данных через обман пользователя." },
@@ -484,9 +478,6 @@ function finishLearning() {
 function restartTest() { openNameModal('test'); }
 function goToStart() { currentLesson = -1; completedLessons.clear(); testUnlocked = false; quizAnswers = []; currentUserName = ''; show('screenIntro'); updateTabs(); updateProgress(); }
 
-// ============================================================
-// NAME MODAL
-// ============================================================
 function openNameModal(mode) {
   nameModalMode = mode || 'learning';
   document.getElementById('userName').value = currentUserName || '';
@@ -512,9 +503,6 @@ function confirmName() {
   else { startLearning(); }
 }
 
-// ============================================================
-// QUIZ
-// ============================================================
 function startTest() {
   currentQ = 0; quizAnswers = [];
   show('screenTest');
@@ -607,9 +595,7 @@ function showResults() {
   updateProgress();
 }
 
-// ============================================================
-// ADMIN AUTH
-// ============================================================
+
 function openAdminFlow() {
   if (isAdmin) { openAdminPanel(); return; }
   openModal('loginModal');
@@ -643,9 +629,7 @@ function logoutAdmin() {
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// ============================================================
-// ADMIN PANEL
-// ============================================================
+
 function openAdminPanel() {
   show('screenAdmin');
   renderAdminStats();
@@ -700,9 +684,6 @@ function clearResults() {
   renderAdminResults();
 }
 
-// ============================================================
-// CHANGE PASSWORD
-// ============================================================
 function changePassword() {
   const oldPass = document.getElementById('oldPass').value;
   const newPass = document.getElementById('newPass').value;
@@ -721,9 +702,7 @@ function changePassword() {
   setTimeout(() => { err.textContent = ''; err.style.color = 'var(--red)'; }, 3000);
 }
 
-// ============================================================
-// UTILS
-// ============================================================
+
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // Close modal on overlay click
@@ -733,7 +712,7 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
-// Init
+
 updateTabs();
 updateProgress();
 updateAdminUI();
